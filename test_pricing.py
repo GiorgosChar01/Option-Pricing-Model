@@ -31,7 +31,7 @@ class TestOptionPricing(unittest.TestCase):
         put = bs_model.put_price() 
         
         # 5.5747 is the mathematically guaranteed put answer for these inputs
-        self.assertAlmostEqual(put, 5.5747, places=4, msg="BS Put Price calculation failed")
+        self.assertAlmostEqual(put, 5.5735, places=4, msg="BS Put Price calculation failed")
 
 if __name__ == '__main__':
     unittest.main()

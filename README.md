@@ -15,3 +15,10 @@ option-pricing-model/
 │   └── monte_carlo.py      # Actuarial GMAB pricing and risk histograms
 ├── requirements.txt        # Project dependencies (numpy, scipy, matplotlib)
 └── .gitignore
+
+## Installation and Setup
+
+1. Clone the repository:
+```bash
+git clone [https://github.com/GiorgosChar01/Option-Pricing-Model.git](https://github.com/GiorgosChar01/Option-Pricing-Model.git)
+cd Option-Pricing-Model
