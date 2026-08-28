@@ -20,5 +20,5 @@ option-pricing-model/
 
 1. Clone the repository:
 ```bash
-git clone [https://github.com/GiorgosChar01/Option-Pricing-Model.git](https://github.com/GiorgosChar01/Option-Pricing-Model.git)
+git clone https://github.com/GiorgosChar01/Option-Pricing-Model.git
 cd Option-Pricing-Model
