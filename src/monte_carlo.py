@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 class ActuarialMonteCarlo:
     """
-    Actuarial Monte Carlo engine for pricing Variable Annuities (GMAB) 
-    and calculating risk sensitivities (Delta).
+    Actuarial Monte Carlo engine for pricing Variable Annuities.
+    Models both Accumulation Benefits (GMAB) and Death Benefits (GMDB) 
+    by integrating financial market simulations with mortality decrements.
     """
     def __init__(self, S, K, T, r, sigma, num_simulations=10000, num_steps=252):
         self.S = S
@@ -27,53 +28,72 @@ class ActuarialMonteCarlo:
                                              self.sigma * np.sqrt(self.dt) * Z[t - 1])
         return paths
 
-    def price_gmab(self, paths):
-        """Calculates the expected cost of a Guaranteed Minimum Accumulation Benefit."""
+    def price_gmab(self, paths, survival_probability=0.85):
+        """
+        Calculates GMAB cost. The insurer only pays the maturity shortfall 
+        IF the policyholder survives to the end of the 10-year term.
+        """
         terminal_prices = paths[-1]
         shortfall = np.maximum(self.K - terminal_prices, 0)
         discount_factor = np.exp(-self.r * self.T)
-        return discount_factor * np.mean(shortfall)
-
-    def calculate_delta(self):
-        """Calculates Delta using the finite difference method."""
-        bump = 1.0
-        paths_up = self.generate_paths(S_initial=self.S + bump)
-        paths_down = self.generate_paths(S_initial=self.S - bump)
         
-        price_up = self.price_gmab(paths_up)
-        price_down = self.price_gmab(paths_down)
-        
-        return (price_up - price_down) / (2 * bump)
+        # Actuarial Present Value = Financial PV * Probability of Survival (tPx)
+        return discount_factor * np.mean(shortfall) * survival_probability
 
-    def plot_risk_distribution(self, paths):
-        """Plots the terminal value distribution and highlights insurer tail risk."""
-        terminal_prices = paths[-1]
+    def price_gmdb(self, paths, annual_mortality_rate=0.015):
+        """
+        Calculates GMDB cost. The insurer pays the shortfall if the market 
+        is down AT THE EXACT YEAR the policyholder dies.
+        """
+        gmdb_cost = 0.0
+        trading_days_per_year = int(self.num_steps / self.T)
+        
+        # Check the portfolio value and mortality risk at each annual anniversary
+        for year in range(1, int(self.T) + 1):
+            step = year * trading_days_per_year
+            prices_at_year = paths[step]
+            shortfall = np.maximum(self.K - prices_at_year, 0)
+            
+            discount_factor = np.exp(-self.r * year)
+            
+            # Probability of surviving prior years, but dying in THIS specific year (q_x)
+            survival_prior = (1 - annual_mortality_rate) ** (year - 1)
+            prob_death_this_year = survival_prior * annual_mortality_rate
+            
+            gmdb_cost += discount_factor * np.mean(shortfall) * prob_death_this_year
+            
+        return gmdb_cost
+
+    def plot_portfolio_paths(self, paths, num_paths=100):
+        """Visualizes the stochastic portfolio paths against the guarantee."""
         plt.figure(figsize=(10, 6))
-        n, bins, patches = plt.hist(terminal_prices, bins=100, alpha=0.75, color='blue', edgecolor='black')
-        
-        for c, p in zip(bins, patches):
-            if c < self.K:
-                plt.setp(p, 'facecolor', 'red')
-                
-        plt.axvline(self.K, color='black', linestyle='dashed', linewidth=2, label=f'GMAB Guarantee (${self.K:,.0f})')
-        plt.title('Variable Annuity Portfolio Value Distribution\n(Red indicates Insurer Payout/Tail Risk)')
-        plt.xlabel('Portfolio Value at Maturity ($)')
-        plt.ylabel('Frequency')
+        plt.plot(paths[:, :num_paths], lw=1, alpha=0.5)
+        plt.axhline(self.K, color='black', linestyle='dashed', linewidth=2, label=f'Guarantee Level (${self.K:,.0f})')
+        plt.title('Variable Annuity: Simulated Portfolio Paths (10 Years)')
+        plt.xlabel('Trading Days')
+        plt.ylabel('Fund Value ($)')
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.show()
 
 if __name__ == "__main__":
+    # 10-year policy, $100k premium, 4% risk-free rate, 15% market volatility
     model = ActuarialMonteCarlo(S=100000.0, K=100000.0, T=10.0, r=0.04, sigma=0.15, num_simulations=50000)
     
     print("Simulating 50,000 portfolio paths...")
     base_paths = model.generate_paths()
     
-    gmab_cost = model.price_gmab(base_paths)
-    print(f"Expected Cost of GMAB Guarantee: ${gmab_cost:,.2f}")
+    # 85% chance to survive 10 years
+    gmab_cost = model.price_gmab(base_paths, survival_probability=0.85) 
     
-    delta = model.calculate_delta()
-    print(f"Risk Sensitivity (Delta): {delta:.4f}")
+    # 1.5% chance of death each year
+    gmdb_cost = model.price_gmdb(base_paths, annual_mortality_rate=0.015)
     
-    print("Generating risk distribution chart...")
-    model.plot_risk_distribution(base_paths)
+    print("-" * 40)
+    print(f"Expected Cost of GMAB (Survival Benefit): ${gmab_cost:,.2f}")
+    print(f"Expected Cost of GMDB (Death Benefit):    ${gmdb_cost:,.2f}")
+    print(f"Total Guarantee Liability:                ${(gmab_cost + gmdb_cost):,.2f}")
+    print("-" * 40)
+    
+    print("Generating path visualization...")
+    model.plot_portfolio_paths(base_paths)
