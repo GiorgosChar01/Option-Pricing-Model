@@ -1,16 +1,17 @@
-# Option Pricing Model
+# Actuarial Option Pricing & Risk Model
 
-A clean, Object-Oriented Programming (OOP) implementation of the Black-Scholes-Merton model in Python for pricing European Call and Put options. Designed as a quantitative finance portfolio piece.
+An Object-Oriented Programming (OOP) portfolio featuring both standard derivative pricing and actuarial risk modeling in Python. This repository includes a closed-form Black-Scholes-Merton model and a stochastic Monte Carlo engine designed to price Guaranteed Minimum Accumulation Benefits (GMAB) for life insurance products.
 
 **Key Features**
-* **OOP Architecture:** Encapsulates pricing logic inside a reusable `BlackScholesModel` class.
-* **Mathematical Rigor:** Computes $d_1$ and $d_2$ parameters efficiently using `numpy` and calculates cumulative normal distributions via `scipy.stats.norm`.
-* **Clean Separation:** Follows a standard `src` layout for maintainable, production-grade code structure.
+* **Actuarial Risk Modeling:** Simulates Geometric Brownian Motion to calculate expected costs of Variable Annuity guarantees and visualize tail risk scenarios.
+* **Risk Sensitivities:** Computes finite-difference Greeks (Delta) to measure portfolio sensitivity to market shocks.
+* **OOP Architecture:** Encapsulates complex pricing logic inside reusable, production-grade Python classes.
 
 **Project Structure**
 ```text
 option-pricing-model/
 ├── src/
-│   └── black_scholes.py    # Core pricing class and execution example
-├── requirements.txt        # Project dependencies
-└── .gitignore              # Files excluded from version control
+│   ├── black_scholes.py    # Standard European Call/Put pricing
+│   └── monte_carlo.py      # Actuarial GMAB pricing and risk histograms
+├── requirements.txt        # Project dependencies (numpy, scipy, matplotlib)
+└── .gitignore
