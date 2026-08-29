@@ -12,10 +12,8 @@ An Object-Oriented Programming (OOP) portfolio featuring both standard derivativ
 ```text
 option-pricing-model/
 ├── src/
-│   ├── black_scholes.py    # Standard European Call/Put pricing
-│   └── monte_carlo.py      # Actuarial GMAB pricing and risk histograms
-├── requirements.txt        # Project dependencies (numpy, scipy, matplotlib)
+│   ├── black_scholres.py  # Standard European Call/Put pricing
+│   └── monte_carlo.py     # Actuarial GMAB pricing and risk histograms
+├── requirements.txt       # Project dependencies (numpy, scipy, matplotlib)
 └── .gitignore
-
-git clone [https://github.com/GiorgosChar01/Option-Pricing-Model.git](https://github.com/GiorgosChar01/Option-Pricing-Model.git)
-cd Option-Pricing-Model
+```
